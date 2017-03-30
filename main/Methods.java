@@ -60,13 +60,14 @@ public class Methods {
 		return climbValue;
 	}
 	public void findEventClimbs(String eventKey){
-
+	    Event event = new TBA().getEvent(eventKey,2017);
+		double eventAvg = 0.0;
+	    int numTeams = event.teams.length;
 	    Settings.GET_EVENT_MATCHES = true;
 	    Settings.GET_EVENT_TEAMS = true;
 	    Settings.FIND_TEAM_RANKINGS = true;
 	    //Settings.GET_EVENT_STATS = true;
 	    
-	    Event event = new TBA().getEvent(eventKey,2017);
 	    for(int i = 0;i < event.teams.length;i++){
 		    int m_teamNum = (int) event.teams[i].team_number;
 		    TeamRequest tr = new TeamRequest();
@@ -96,10 +97,16 @@ public class Methods {
 		    		}
 		    	}
 	    	}
-
-	    	System.out.println(m_teamNum+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+climbs / matchesTeamsIn*100+" - "+i);
+	    	double teamClimbAvg = climbs/matchesTeamsIn;
+	    	if(Double.isNaN(teamClimbAvg) == false){
+	    		eventAvg += teamClimbAvg;
+	    	}else{
+	    		numTeams --;
+	    	}
+	    	System.out.println(m_teamNum+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+teamClimbAvg*100+" - "+i);
 	    	//System.out.println(m_teamNum+" numMatches: "+matchesTeamsIn);
 	    	//System.out.println(m_teamNum+" %climb: "+climbs / matchesTeamsIn*100);
 	    }
+	    System.out.println(eventKey+" climb avg: "+eventAvg/numTeams*100+"%");
 	}
 }
