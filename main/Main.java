@@ -5,6 +5,7 @@ import com.cpjd.main.TBA;
 import com.cpjd.models.Event;
 import com.cpjd.models.Match;
 import com.cpjd.models.Team;
+import com.cpjd.requests.MatchRequest;
 import com.cpjd.requests.TeamRequest;
 
 public class Main {
@@ -14,7 +15,8 @@ public class Main {
 	    TBA tba = new TBA();
 	    TBA.setID("frc4587", "Scouting application", "V1");
 	    // Pull the team
-	    Team team = tba.getTeam(4587);
+	    int m_teamNum = 4587;
+	    Team team = tba.getTeam(m_teamNum);
 	    // Print some information
 	    /*System.out.println(team.name);
 	    System.out.println(team.team_number);
@@ -36,6 +38,8 @@ public class Main {
 	    Match[] matches = bayou.matches; 
 	    TeamRequest tr = new TeamRequest();
 	    Event[] events = tr.getTeamEvents((int) team.team_number,2017);
+	    Match[] teamMatches = tr.getTeamEventMatches(2017, "lake", m_teamNum);
+	    Methods m = new Methods();
 	    /*for(int i = 0; i<events.length;i++){
 		    System.out.println(events[i].short_name);
 	    }*/
@@ -55,20 +59,38 @@ public class Main {
 	    int teamNum = 4587;
 	    
     	double climbs = 0.0;
-    	int matchesTeamsIn = matches.length;
-    	for(int x = 0;x < matches.length;x++){
+    	int matchesTeamsIn = teamMatches.length;
+    	int badCount = 0;
+    	for(int x = 0;x < teamMatches.length;x++){
 
-    		Match match = matches[x];
-
-    		String dspos;
-    		String alliance;
+    		Match match = teamMatches[x];
+    		int climbVal = m.findClimbValueNum(m_teamNum, match);
+    		//System.out.println("climbVal: "+climbVal);
+    		System.out.println("match num: " + match.comp_level+match.match_number);
+    		for(int i = 0;i < match.scorableItems.length;i++)
+    		{
+        		System.out.println(match.scorableItems[i]+" red "+match.redValues[i]+" blue "+match.blueValues[i]);	
+    		}
+	    	if(climbVal >= 0){
+	    		if(match.blueTeams[0].equals("frc"+teamNum) || match.blueTeams[1].equals("frc"+teamNum) || match.blueTeams[2].equals("frc"+teamNum)){
+	    			if(match.blueValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+	    			//System.out.println("blue "+match.blueValues[climbVal]);
+	    		}else{
+	    			if(match.redValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+	    			//System.out.println("red "+match.redValues[climbVal]);
+	    		}
+    		}else{
+    			badCount++;
+    		}
+    		/*String dspos = "118";
+    		String alliance = "purple";
     		if(match.blueTeams[0].equals("frc"+teamNum)){alliance = "blue"; dspos = "0";}
     		if(match.blueTeams[1].equals("frc"+teamNum)){alliance = "blue"; dspos = "1";}
     		if(match.blueTeams[2].equals("frc"+teamNum)){alliance = "blue"; dspos = "2";}
     		if(match.redTeams[0].equals("frc"+teamNum)){alliance = "red"; dspos = "0";}
     		if(match.redTeams[1].equals("frc"+teamNum)){alliance = "red"; dspos = "1";}
     		if(match.redTeams[2].equals("frc"+teamNum)){alliance = "red"; dspos = "2";}
-    		else{alliance = "purple"; dspos = "118";}
+    		//System.out.println("b0 "+match.blueTeams[0]+" b1 "+match.blueTeams[1]+" b2 "+match.blueTeams[2]+" r0 "+match.redTeams[0]+" r1 "+match.redTeams[1]+" r2 "+match.redTeams[2]);
     		//else{alliance = "red"; dspos = "2";}
     		String[] pos = new String[]{"a","b"};
     		pos[0] = alliance;
@@ -80,45 +102,20 @@ public class Main {
     		if(pos[0].equals("red") && pos[1].equals("0")){if(matches[x].redValues[2].equals("ReadyForTakeoff")){climbs+=1.0;}}//far
     		if(pos[0].equals("red") && pos[1].equals("1")){if(matches[x].redValues[33].equals("ReadyForTakeoff")){climbs+=1.0;}}//middle
     		if(pos[0].equals("red") && pos[1].equals("2")){if(matches[x].redValues[21].equals("ReadyForTakeoff")){climbs+=1.0;}}//near
-    		else{matchesTeamsIn -= 1;}
-
+*/
         	System.out.println("Climbs: "+climbs);
-        	System.out.println("numMatches: "+matchesTeamsIn);
+        	//System.out.println("numMatches: "+matchesTeamsIn);
     	}
+    	MatchRequest mr = new MatchRequest();
+    	Match xx = mr.getMatch(2017, "lake", "sf2m2");
+    	for(int i = 0;i < xx.scorableItems.length;i++){
+    		System.out.println(xx.scorableItems[i]+" red "+xx.redValues[i]+" blue "+xx.blueValues[i]);
+    	}
+
     	System.out.println(climbs);
     	System.out.println(matchesTeamsIn);
     	System.out.println(climbs / matchesTeamsIn);
-	    
-	}
-	private void climbPercent(int teamNum, Event event){
-    	Match[] matches = event.matches;
-    	double climbs = 0.0;
-    	int matchesTeamsIn = matches.length;
-    	for(int x = 0;x < matches.length;x++){
-    		String[] dspos = findTeamPositionAndColor(teamNum, matches[x]);
-    		if(dspos[0].equals("blue") && dspos[1].equals("0") && matches[x].blueValues[2].equals("ReadyForTakeoff")){climbs+=1.0;}//far
-    		if(dspos[0].equals("blue") && dspos[1].equals("1") && matches[x].blueValues[33].equals("ReadyForTakeoff")){climbs+=1.0;}//middle
-    		if(dspos[0].equals("blue") && dspos[1].equals("2") && matches[x].blueValues[21].equals("ReadyForTakeoff")){climbs+=1.0;}//near
-    		if(dspos[0].equals("red") && dspos[1].equals("0") && matches[x].redValues[2].equals("ReadyForTakeoff")){climbs+=1.0;}//far
-    		if(dspos[0].equals("red") && dspos[1].equals("1") && matches[x].redValues[33].equals("ReadyForTakeoff")){climbs+=1.0;}//middle
-    		if(dspos[0].equals("red") && dspos[1].equals("2") && matches[x].redValues[21].equals("ReadyForTakeoff")){climbs+=1.0;}//near
-    		else{matchesTeamsIn -= 1;}
-    	}
-    	System.out.println(climbs / matchesTeamsIn);
-	}
-	private String[] findTeamPositionAndColor(int teamNum, Match match){
-		String dspos;
-		String alliance;
-		if(match.blueTeams[0].equals(teamNum)){alliance = "blue"; dspos = "0";}
-		if(match.blueTeams[1].equals(teamNum)){alliance = "blue"; dspos = "1";}
-		if(match.blueTeams[2].equals(teamNum)){alliance = "blue"; dspos = "2";}
-		if(match.redTeams[0].equals(teamNum)){alliance = "red"; dspos = "0";}
-		if(match.redTeams[1].equals(teamNum)){alliance = "red"; dspos = "1";}
-		if(match.redTeams[2].equals(teamNum)){alliance = "red"; dspos = "2";}
-		else{alliance = null; dspos = null;}
-		String[] pos = new String[]{"a","b"};
-		pos[0] = alliance;
-		pos[1] = dspos;
-		return pos;
+    	System.out.println(badCount);
+    	System.out.println(climbs / (matchesTeamsIn-badCount));
 	}
 }
