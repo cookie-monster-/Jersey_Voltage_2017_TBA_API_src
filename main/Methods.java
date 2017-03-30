@@ -1,7 +1,10 @@
 package main;
 
+import com.cpjd.main.Settings;
+import com.cpjd.main.TBA;
 import com.cpjd.models.Event;
 import com.cpjd.models.Match;
+import com.cpjd.requests.TeamRequest;
 
 public class Methods {
 	public void climbPercent(int teamNum, Event event){
@@ -55,5 +58,48 @@ public class Methods {
 			}
 		}
 		return climbValue;
+	}
+	public void findEventClimbs(String eventKey){
+
+	    Settings.GET_EVENT_MATCHES = true;
+	    Settings.GET_EVENT_TEAMS = true;
+	    Settings.FIND_TEAM_RANKINGS = true;
+	    //Settings.GET_EVENT_STATS = true;
+	    
+	    Event event = new TBA().getEvent(eventKey,2017);
+	    for(int i = 0;i < event.teams.length;i++){
+		    int m_teamNum = (int) event.teams[i].team_number;
+		    TeamRequest tr = new TeamRequest();
+		    //Event[] events = tr.getTeamEvents((int) m_teamNum,2017);
+		    Match[] teamMatches = tr.getTeamEventMatches(2017, eventKey, m_teamNum);
+		    Methods methods = new Methods();
+		    double climbs = 0.0;
+	    	int matchesTeamsIn = 0;
+	    	for(int x = 0;x < teamMatches.length;x++){
+
+	    		Match match = teamMatches[x];
+	        	matchesTeamsIn = x+1;
+	    		int climbVal = methods.findClimbValueNum(m_teamNum, match);
+	    		//System.out.println("climbVal: "+climbVal);
+	    		//System.out.println("match num: " + match.comp_level+match.match_number);
+	    		/*for(int i = 0;i < match.scorableItems.length;i++)
+	    		{
+	        		System.out.println(match.scorableItems[i]+" red "+match.redValues[i]+" blue "+match.blueValues[i]);	
+	    		}*/
+		    	if(climbVal >= 0){
+		    		if(match.blueTeams[0].equals("frc"+m_teamNum) || match.blueTeams[1].equals("frc"+m_teamNum) || match.blueTeams[2].equals("frc"+m_teamNum)){
+		    			if(match.blueValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+		    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
+		    		}else{
+		    			if(match.redValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+		    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
+		    		}
+		    	}
+	    	}
+
+	    	System.out.println(m_teamNum+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+climbs / matchesTeamsIn*100+" - "+i);
+	    	//System.out.println(m_teamNum+" numMatches: "+matchesTeamsIn);
+	    	//System.out.println(m_teamNum+" %climb: "+climbs / matchesTeamsIn*100);
+	    }
 	}
 }
