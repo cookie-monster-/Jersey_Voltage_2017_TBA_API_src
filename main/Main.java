@@ -35,9 +35,9 @@ public class Main {
 	    //Settings.GET_EVENT_STATS = true;
 	    
 	    Methods methods = new Methods();
-	    //methods.findEventClimbs("lake");
+	    methods.findEventClimbs("lake");
 	    //Match[] matches = bayou.matches; 
-	    Event event = new TBA().getEvent(eventKey,2017);
+	    /*Event event = new TBA().getEvent(eventKey,2017);
 
 		double eventAvg = 0.0;
 	    int numTeams = event.teams.length;
@@ -63,10 +63,6 @@ public class Main {
 			    		int climbVal = methods.findClimbValueNum(m_teamNum, match);
 			    		//System.out.println("climbVal: "+climbVal);
 			    		//System.out.println("match num: " + match.comp_level+match.match_number);
-			    		/*for(int i = 0;i < match.scorableItems.length;i++)
-			    		{
-			        		System.out.println(match.scorableItems[i]+" red "+match.redValues[i]+" blue "+match.blueValues[i]);	
-			    		}*/
 				    	if(climbVal >= 0){
 				    		if(match.blueTeams[0].equals("frc"+m_teamNum) || match.blueTeams[1].equals("frc"+m_teamNum) || match.blueTeams[2].equals("frc"+m_teamNum)){
 				    			if(match.blueValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
@@ -87,7 +83,7 @@ public class Main {
 			    	//System.out.println(m_teamNum+" numMatches: "+matchesTeamsIn);
 			    	//System.out.println(m_teamNum+" %climb: "+climbs / matchesTeamsIn*100);
 		    	}catch(Exception e){}
-		    }
+		    }*/
 	    //}
 	}
 }

@@ -103,7 +103,7 @@ public class Methods {
 	    	}else{
 	    		numTeams --;
 	    	}
-	    	System.out.println(m_teamNum+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+teamClimbAvg*100+" - "+i);
+	    	System.out.println(m_teamNum+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+teamClimbAvg*100);
 	    	//System.out.println(m_teamNum+" numMatches: "+matchesTeamsIn);
 	    	//System.out.println(m_teamNum+" %climb: "+climbs / matchesTeamsIn*100);
 	    }
