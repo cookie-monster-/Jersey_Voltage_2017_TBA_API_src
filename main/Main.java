@@ -1,5 +1,8 @@
 package main;
 
+import java.io.FileWriter;
+import java.io.IOException;
+
 import com.cpjd.main.Settings;
 import com.cpjd.main.TBA;
 import com.cpjd.models.Event;
@@ -21,10 +24,24 @@ public class Main {
 	    
 	    Methods methods = new Methods();
 	    
-	    //methods.findEventClimbs("lake");
-	    methods.findEventClimbPastAvgs("lake");
+	    methods.findEventClimbs("lake");
+	    //methods.findEventClimbPastAvgs("lake");
 	    
 	    //Match[] matches = bayou.matches; 
+	    /*String filename = "csvTest";
+		FileWriter m_writer;
+	    try {
+			m_writer = new FileWriter("C:/home/Users/Drew/Desktop/"+filename+".csv", false);
+			m_writer.write("aLeft,vLeft,xLeft,aRight,vRight,xRight,desiredAngle,currentAngle,realLeftEncoder,realRightEncoder,leftMotorLevel,rightMotorLevel,System.nanoTime()" + "\n");
+		} catch ( IOException e ) {
+			System.out.println(e);
+			m_writer = null;
+		}
 	    
+	    if(m_writer != null){try{
+				m_writer.write("\n");
+			}catch(Exception e){}}
+	    
+    	try{m_writer.close();}catch(Exception e){}*/
 	}
 }
