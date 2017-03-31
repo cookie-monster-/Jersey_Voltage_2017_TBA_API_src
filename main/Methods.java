@@ -109,4 +109,53 @@ public class Methods {
 	    }
 	    System.out.println(eventKey+" climb avg: "+eventAvg/numTeams*100+"%");
 	}
+	
+	public void findEventClimbPastAvgs(String eventKey){
+		Event event = new TBA().getEvent(eventKey,2017);
+
+		double eventAvg = 0.0;
+	    int numTeams = event.teams.length;
+	    Settings.GET_EVENT_MATCHES = true;
+	    Settings.GET_EVENT_TEAMS = true;
+	    Settings.FIND_TEAM_RANKINGS = true;
+
+	    for(int i = 0;i < event.teams.length;i++){
+		    int m_teamNum = (int) event.teams[i].team_number;
+		    TeamRequest tr = new TeamRequest();
+		    Event[] teamEvents = tr.getTeamEvents(m_teamNum, 2017);
+		    for(int j = 0;j < teamEvents.length;j++){
+		    	try{
+				    double climbs = 0.0;
+			    	int matchesTeamsIn = 0;
+			    	Match[] teamMatches = tr.getTeamEventMatches(2017, teamEvents[j].event_code, m_teamNum);
+			    	for(int x = 0;x < teamMatches.length;x++){
+		
+			    		Match match = teamMatches[x];
+			        	matchesTeamsIn = x+1;
+			    		int climbVal = findClimbValueNum(m_teamNum, match);
+			    		//System.out.println("climbVal: "+climbVal);
+			    		//System.out.println("match num: " + match.comp_level+match.match_number);
+				    	if(climbVal >= 0){
+				    		if(match.blueTeams[0].equals("frc"+m_teamNum) || match.blueTeams[1].equals("frc"+m_teamNum) || match.blueTeams[2].equals("frc"+m_teamNum)){
+				    			if(match.blueValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+				    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
+				    		}else{
+				    			if(match.redValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+				    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
+				    		}
+				    	}
+			    	}
+			    	double teamClimbAvg = climbs/matchesTeamsIn;
+			    	if(Double.isNaN(teamClimbAvg) == false){
+			    		eventAvg += teamClimbAvg;
+			    	}else{
+			    		numTeams --;
+			    	}
+			    	System.out.println(m_teamNum+" "+teamEvents[j].name+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+teamClimbAvg*100);
+			    	//System.out.println(m_teamNum+" numMatches: "+matchesTeamsIn);
+			    	//System.out.println(m_teamNum+" %climb: "+climbs / matchesTeamsIn*100);
+		    	}catch(Exception e){}
+		    }
+	    }
+	}
 }
