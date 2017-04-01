@@ -24,7 +24,8 @@ public class Main {
 	    
 	    Methods methods = new Methods();
 	    
-	    methods.findEventClimbs("lake");
+	    //methods.findEventClimbs("lake","ClimbTest3","Drew");
+	    methods.findEventClimbPastAvgs("txsa","ClimbTest2","Drew");
 	    //methods.findEventClimbPastAvgs("lake");
 	    
 	    //Match[] matches = bayou.matches; 

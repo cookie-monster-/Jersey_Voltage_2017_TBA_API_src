@@ -62,7 +62,18 @@ public class Methods {
 		}
 		return climbValue;
 	}
-	public void findEventClimbs(String eventKey){
+	public int findScoreValueNum(String scoreValue, Match match){
+		int scoreValueNum = -1;
+		for(int i = 0;i < match.scorableItems.length;i++){
+			if(match.scorableItems[i] != null){
+				if(match.scorableItems[i].equals(scoreValue)){
+					scoreValueNum = i;
+				}
+			}
+		}
+		return scoreValueNum;
+	}
+	public void findEventClimbs(String eventKey,String filename,String username){
 	    Event event = new TBA().getEvent(eventKey,2017);
 		double eventAvg = 0.0;
 	    int numTeams = event.teams.length;
@@ -71,8 +82,7 @@ public class Methods {
 	    Settings.FIND_TEAM_RANKINGS = true;
 	    //Settings.GET_EVENT_STATS = true;
 	    
-	    String filename = eventKey + "ClimbTest1";
-	    String username = "Drew";
+	    filename = eventKey + filename;
 		FileWriter m_writer;
 	    try {
 			m_writer = new FileWriter("C:/Users/"+username+"/Desktop/"+filename+".csv", false);
@@ -83,17 +93,20 @@ public class Methods {
 		}
 	    
 	    for(int i = 0;i < event.teams.length;i++){
+	    	String toWrite = "";
 		    int m_teamNum = (int) event.teams[i].team_number;
+		    double m_teamRank = event.teams[i].rank;
+		    double teamRPScore = 0.0;
 		    TeamRequest tr = new TeamRequest();
 		    //Event[] events = tr.getTeamEvents((int) m_teamNum,2017);
 		    Match[] teamMatches = tr.getTeamEventMatches(2017, eventKey, m_teamNum);
 		    
 		    if(m_writer != null){try{
-					m_writer.write(event.event_code+"Team:"+m_teamNum);
-					for(int q = 0;q < teamMatches.length;q++){
+					m_writer.write(event.event_code+","+m_teamNum+",");
+					/*for(int q = 0;q < teamMatches.length;q++){
 						m_writer.write(",Match:"+teamMatches[q].comp_level+teamMatches[q].match_number);
-					}
-					m_writer.write(",climbAvg"+"\n"+event.event_code+",");
+					}*/
+					//m_writer.write(",climbAvg"+"\n"+event.event_code+",");
 				}catch(Exception e){}}
 		    
 		    Methods methods = new Methods();
@@ -120,14 +133,15 @@ public class Methods {
 		    		}
 		    	}
 
-			    if(m_writer != null){try{
+			    /*if(m_writer != null){try{
 						m_writer.write(matchClimb+",");
 					}catch(Exception e){}}
-		    	
+		    	*/
 	    	}
 	    	double teamClimbAvg = climbs/matchesTeamsIn;
+	    	toWrite = toWrite + teamClimbAvg+","+m_teamRank;
 		    if(m_writer != null){try{
-					m_writer.write(teamClimbAvg+"\n");
+					m_writer.write(toWrite+"\n");
 				}catch(Exception e){}}
 	    	if(Double.isNaN(teamClimbAvg) == false){
 	    		eventAvg += teamClimbAvg;
@@ -142,7 +156,7 @@ public class Methods {
 	    try{m_writer.close();}catch(Exception e){System.out.println(e);}
 	}
 	
-	public void findEventClimbPastAvgs(String eventKey){
+	public void findEventClimbPastAvgs(String eventKey,String filename,String username){
 		Event event = new TBA().getEvent(eventKey,2017);
 
 		double eventAvg = 0.0;
@@ -150,44 +164,99 @@ public class Methods {
 	    Settings.GET_EVENT_MATCHES = true;
 	    Settings.GET_EVENT_TEAMS = true;
 	    Settings.FIND_TEAM_RANKINGS = true;
+	    
+	    filename = eventKey + filename;
+		FileWriter m_writer;
+	    try {
+			m_writer = new FileWriter("C:/Users/"+username+"/Desktop/"+filename+".csv", false);
+		} catch ( IOException e ) {
+			System.out.println(e);
+			m_writer = null;
+		}
+	    if(m_writer != null){try{
+				m_writer.write("teamEvents,teamNum,climbOverallAvg,OverallRank"+"\n");
+			}catch(Exception e){}}
 
-	    for(int i = 0;i < event.teams.length;i++){
+	    for(int i = 0;i < numTeams;i++){
+	    	String toWrite = "";
 		    int m_teamNum = (int) event.teams[i].team_number;
 		    TeamRequest tr = new TeamRequest();
 		    Event[] teamEvents = tr.getTeamEvents(m_teamNum, 2017);
+		    int teamNumEvents = teamEvents.length;
+		    double teamClimbOverallAvg = 0.0;
+		    double teamRankingOverallAvg = 0.0;
 		    for(int j = 0;j < teamEvents.length;j++){
+		    	double teamClimbAvg = 0;;
 		    	try{
-				    double climbs = 0.0;
-			    	int matchesTeamsIn = 0;
-			    	Match[] teamMatches = tr.getTeamEventMatches(2017, teamEvents[j].event_code, m_teamNum);
-			    	for(int x = 0;x < teamMatches.length;x++){
-		
-			    		Match match = teamMatches[x];
-			        	matchesTeamsIn = x+1;
-			    		int climbVal = findClimbValueNum(m_teamNum, match);
-			    		//System.out.println("climbVal: "+climbVal);
-			    		//System.out.println("match num: " + match.comp_level+match.match_number);
-				    	if(climbVal >= 0){
-				    		if(match.blueTeams[0].equals("frc"+m_teamNum) || match.blueTeams[1].equals("frc"+m_teamNum) || match.blueTeams[2].equals("frc"+m_teamNum)){
-				    			if(match.blueValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
-				    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
-				    		}else{
-				    			if(match.redValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
-				    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
-				    		}
+		    		double oldTROA = teamRankingOverallAvg;
+		    		for(int q = 0;q < teamEvents[j].teams.length;q++)
+		    		{
+		    			if(teamEvents[j].teams[q].team_number == event.teams[i].team_number)
+		    			{
+				    		teamRankingOverallAvg += teamEvents[j].teams[q].rank;
+		    			}
+		    		}
+		    		if(oldTROA == teamRankingOverallAvg){
+		    			teamNumEvents--;
+		    		}
+		    		Match[] teamMatches = tr.getTeamEventMatches(2017, teamEvents[j].event_code, m_teamNum);
+			    	//if(teamMatches.length > 0){
+				    	toWrite = toWrite + teamEvents[j].event_code+" ";
+					    /*if(m_writer != null){try{
+								m_writer.write(event.event_code+","+m_teamNum+",");
+								/*for(int q = 0;q < teamMatches.length;q++){
+									m_writer.write(",Match:"+teamMatches[q].comp_level+teamMatches[q].match_number);
+								}
+								//m_writer.write(",climbAvg"+"\n"+event.event_code+",");
+							}catch(Exception e){}}*/
+					    double climbs = 0.0;
+				    	int matchesTeamsIn = 0;
+				    	for(int x = 0;x < teamMatches.length;x++){
+			
+				    		Match match = teamMatches[x];
+				        	matchesTeamsIn = x+1;
+				    		int climbVal = findClimbValueNum(m_teamNum, match);
+				    		//System.out.println("climbVal: "+climbVal);
+				    		//System.out.println("match num: " + match.comp_level+match.match_number);
+					    	if(climbVal >= 0){
+					    		if(match.blueTeams[0].equals("frc"+m_teamNum) || match.blueTeams[1].equals("frc"+m_teamNum) || match.blueTeams[2].equals("frc"+m_teamNum)){
+					    			if(match.blueValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+					    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
+					    		}else{
+					    			if(match.redValues[climbVal].equals("ReadyForTakeoff")){climbs+=1.0;}
+					    			//else{System.out.println("match: " + match.comp_level+match.match_number+" "+m_teamNum+" missed climb");}
+					    		}
+					    	}
 				    	}
-			    	}
-			    	double teamClimbAvg = climbs/matchesTeamsIn;
-			    	if(Double.isNaN(teamClimbAvg) == false){
-			    		eventAvg += teamClimbAvg;
-			    	}else{
-			    		numTeams --;
-			    	}
-			    	System.out.println(m_teamNum+" "+teamEvents[j].name+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+teamClimbAvg*100);
-			    	//System.out.println(m_teamNum+" numMatches: "+matchesTeamsIn);
-			    	//System.out.println(m_teamNum+" %climb: "+climbs / matchesTeamsIn*100);
-		    	}catch(Exception e){}
+				    	teamClimbAvg = climbs/matchesTeamsIn;
+				    	}catch(Exception e){/*System.out.println(e);*/}
+				    	/*toWrite = toWrite + teamClimbAvg;
+					    if(m_writer != null){try{
+								m_writer.write(toWrite+"\n");
+							}catch(Exception e){}}*/
+				    	if(Double.isNaN(teamClimbAvg) == false){
+				    		eventAvg += teamClimbAvg;
+						    teamClimbOverallAvg += teamClimbAvg;
+				    	}else{
+				    		numTeams --;
+				    	}
+				    	//System.out.println(m_teamNum+" "+teamEvents[j].name+" Climbs: "+climbs+" numMatches: "+matchesTeamsIn+" %climb: "+teamClimbAvg*100);
+				    	//System.out.println(m_teamNum+" numMatches: "+matchesTeamsIn);
+				    	//System.out.println(m_teamNum+" %climb: "+climbs / matchesTeamsIn*100);
+			    	//}
+		    	
 		    }
+		    System.out.println(teamRankingOverallAvg+" "+teamNumEvents);
+		    teamClimbOverallAvg /= teamNumEvents;
+		    teamRankingOverallAvg = teamRankingOverallAvg / teamNumEvents;
+		    toWrite = toWrite + "," + m_teamNum + "," + teamClimbOverallAvg+","+teamRankingOverallAvg;
+		    System.out.println(m_teamNum + "," + teamClimbOverallAvg+","+teamRankingOverallAvg);
+		    if(m_writer != null){try{
+					m_writer.write(toWrite+"\n");
+				}catch(Exception e){}}
 	    }
+	    System.out.println("Done!");
+	    try{m_writer.close();}catch(Exception e){System.out.println(e);}
+	    
 	}
 }
